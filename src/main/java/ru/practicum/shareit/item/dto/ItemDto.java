@@ -4,8 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import ru.practicum.shareit.request.ItemRequest;
-import ru.practicum.shareit.user.User;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -15,13 +13,10 @@ import javax.validation.constraints.NotNull;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemDto {
-    private Long id;
     @NotBlank
     private String name;
     private String description;
     @NotNull
     private boolean isAvailable;
-    @NotNull
-    private User owner;
-    private ItemRequest request;
+    private Long requestId;
 }
