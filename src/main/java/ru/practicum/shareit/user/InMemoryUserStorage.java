@@ -20,7 +20,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getUser(Long userId) {
-        return Optional.ofNullable(userHashMap.get(userId).clone());
+        return Optional.ofNullable(userHashMap.get(userId) != null ? userHashMap.get(userId).clone() : null);
     }
 
     @Override
@@ -37,5 +37,15 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public Collection<User> getUsers() {
         return userHashMap.values();
+    }
+
+    @Override
+    public boolean isUniqueEmail(String email, Long userId) {
+        if (userId == null) {
+            return userHashMap.values().stream().noneMatch(user -> user.getEmail().equals(email));
+        }
+        return userHashMap.values().stream()
+                .filter(user -> !user.getId().equals(userId))
+                .noneMatch(user -> user.getEmail().equals(email));
     }
 }

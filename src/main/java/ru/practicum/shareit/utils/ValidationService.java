@@ -21,21 +21,13 @@ public class ValidationService {
     }
 
     public void validate(UserDto userDto) {
-        String email = userDto.getEmail();
-        boolean isUniqueEmail = userStorage.getUsers().stream()
-                .noneMatch(user -> user.getEmail().equals(email));
-        if (email != null && !isUniqueEmail) {
+        if (!userStorage.isUniqueEmail(userDto.getEmail(), null)) {
             throw new NotUniqueValueException("адрес электронной почты");
         }
     }
 
-    public void validate (@Valid User user) {
-        Long id = user.getId();
-        String email = user.getEmail();
-        boolean isUniqueEmail = userStorage.getUsers().stream()
-                        .filter(u -> !u.getId().equals(id))
-                        .noneMatch(u -> u.getEmail().equals(email));
-        if (email != null && !isUniqueEmail) {
+    public void validate(@Valid User user) {
+        if (!userStorage.isUniqueEmail(user.getEmail(), user.getId())) {
             throw new NotUniqueValueException("адрес электронной почты");
         }
     }

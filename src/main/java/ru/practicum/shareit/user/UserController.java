@@ -13,6 +13,7 @@ import java.util.Map;
 @RequestMapping(path = "/users")
 public class UserController {
     UserService userService;
+
     @Autowired
     public UserController(UserService userService) {
         this.userService = userService;
@@ -25,7 +26,7 @@ public class UserController {
     }
 
     @PostMapping
-    public UserDto createUser (@Valid @RequestBody UserDto user) {
+    public UserDto createUser(@Valid @RequestBody UserDto user) {
         log.info("Создание пользователя");
         return userService.createUser(user);
     }

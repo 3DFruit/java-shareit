@@ -11,11 +11,20 @@ import ru.practicum.shareit.user.User;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Item {
+public class Item implements Cloneable {
     private Long id;
     private String name;
     private String description;
     private boolean isAvailable;
     private User owner;
     private ItemRequest request;
+
+    @Override
+    public Item clone() {
+        try {
+            return (Item) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

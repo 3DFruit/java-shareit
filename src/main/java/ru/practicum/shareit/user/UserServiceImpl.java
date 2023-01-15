@@ -5,7 +5,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.practicum.shareit.utils.ValidationService;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
-import ru.practicum.shareit.utils.exceptions.UnsupportedParameterException;
 
 import java.util.Collection;
 import java.util.Map;
@@ -56,8 +55,6 @@ public class UserServiceImpl implements UserService {
                     break;
                 default:
                     log.warn("Передан не обрабатываемый параметр для обновления User: {}", paramName);
-                    throw new UnsupportedParameterException("Передан не обрабатываемый параметр для обновления User: "+
-                            paramName);
             }
         }
         validationService.validate(user);
