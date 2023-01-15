@@ -19,9 +19,9 @@ public class ErrorHandler {
             UnsupportedParameterException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ErrorResponse handleValidateException (final Exception e) {
-        log.warn("Ошибка: {}", e.getMessage(), e);
+        log.warn("Ошибка запроса: {}", e.getMessage(), e);
         return new ErrorResponse(
-                "Ошибка: " + e.getMessage()
+                "Ошибка запроса: " + e.getMessage()
         );
     }
 
