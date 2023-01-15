@@ -5,7 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Positive;
+import java.util.Collection;
+import java.util.Map;
 
 @Slf4j
 @RestController
@@ -17,6 +18,12 @@ public class UserController {
         this.userService = userService;
     }
 
+    @GetMapping
+    public Collection<UserDto> getUsers() {
+        log.info("Запрошен список пользователей");
+        return userService.getUsers();
+    }
+
     @PostMapping
     public UserDto createUser (@Valid @RequestBody UserDto user) {
         log.info("Создание пользователя");
@@ -24,19 +31,19 @@ public class UserController {
     }
 
     @GetMapping(path = "/{userId}")
-    public UserDto getUser(@Positive @PathVariable Long userId) {
+    public UserDto getUser(@PathVariable Long userId) {
         log.info("Запрошен пользователь с id {}", userId);
         return userService.getUser(userId);
     }
 
     @PatchMapping("/{userId}")
-    public UserDto updateUser(@Positive @PathVariable Long userId, @Valid @RequestBody UserDto user) {
+    public UserDto updateUser(@PathVariable Long userId, @RequestBody Map<String, Object> updatedData) {
         log.info("Обновление пользователя с id {}", userId);
-        return userService.updateUser(userId, user);
+        return userService.updateUser(userId, updatedData);
     }
 
     @DeleteMapping("/{userId}")
-    public void deleteUser(@Positive @PathVariable Long userId) {
+    public void deleteUser(@PathVariable Long userId) {
         log.info("Удаление пользователя с id {}", userId);
         userService.deleteUser(userId);
     }

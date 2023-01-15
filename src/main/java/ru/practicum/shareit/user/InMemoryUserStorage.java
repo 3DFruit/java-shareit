@@ -2,6 +2,7 @@ package ru.practicum.shareit.user;
 
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -19,19 +20,22 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public Optional<User> getUser(Long userId) {
-        return Optional.ofNullable(userHashMap.get(userId));
+        return Optional.ofNullable(userHashMap.get(userId).clone());
     }
 
     @Override
-    public Optional<User> updateUser(Long userId, UserDto user) {
-        if (userHashMap.containsKey(userId)) {
-            userHashMap.put(userId, new User(userId, user.getName(), user.getEmail()));
-        }
-        return Optional.ofNullable(userHashMap.get(userId));
+    public User updateUser(User user) {
+        userHashMap.put(user.getId(), user);
+        return userHashMap.get(user.getId()).clone();
     }
 
     @Override
     public void deleteUser(Long userId) {
         userHashMap.remove(userId);
+    }
+
+    @Override
+    public Collection<User> getUsers() {
+        return userHashMap.values();
     }
 }
