@@ -7,11 +7,11 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.utils.UserMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
+import ru.practicum.shareit.utils.exceptions.NotUniqueValueException;
 import ru.practicum.shareit.utils.service.ValidationService;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,24 +44,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto updateUser(Long userId, Map<String, Object> updatedData) {
+    public UserDto updateUser(Long userId, UserDto userDto) {
         User user = userStorage.getUser(userId)
                 .orElseThrow(() -> {
                     throw new ObjectNotFoundException("Не найден пользователь с id " + userId);
                 });
-        for (String paramName : updatedData.keySet()) {
-            switch (paramName) {
-                case "name":
-                    user.setName(updatedData.get(paramName).toString());
-                    break;
-                case "email":
-                    user.setEmail(updatedData.get(paramName).toString());
-                    break;
-                default:
-                    log.warn("Передан не обрабатываемый параметр для обновления User: {}", paramName);
+        if (userDto.getName() != null && !userDto.getName().isBlank()) {
+            user.setName(userDto.getName());
+        }
+        if (userDto.getEmail() != null) {
+            if (userStorage.isUniqueEmail(userDto.getEmail(), userId)) {
+                user.setEmail(userDto.getEmail());
+            } else {
+                throw new NotUniqueValueException("адрес электронной почты");
             }
         }
-        validationService.validate(user);
         return UserMapper.toUserDto(userStorage.updateUser(user));
     }
 

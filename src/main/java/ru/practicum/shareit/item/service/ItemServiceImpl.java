@@ -13,7 +13,6 @@ import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.utils.exceptions.UnauthorizedAccessException;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -44,27 +43,21 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto patchItem(Long userId, Long itemId, Map<String, Object> updatedData) {
+    public ItemDto patchItem(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemStorage.getItem(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
         );
         if (!item.getOwner().getId().equals(userId)) {
             throw new UnauthorizedAccessException("Id пользователя(" + userId + ") и владельца не совпадают");
         }
-        for (String paramName : updatedData.keySet()) {
-            switch (paramName) {
-                case "name":
-                    item.setName(updatedData.get(paramName).toString());
-                    break;
-                case "description":
-                    item.setDescription(updatedData.get(paramName).toString());
-                    break;
-                case "available":
-                    item.setAvailable((boolean) updatedData.get(paramName));
-                    break;
-                default:
-                    log.warn("Передан не обрабатываемый параметр для обновления Item: {}", paramName);
-            }
+        if (itemDto.getName() != null && !itemDto.getName().isBlank()) {
+            item.setName(itemDto.getName());
+        }
+        if (itemDto.getDescription() != null && !itemDto.getDescription().isBlank()) {
+            item.setDescription(itemDto.getDescription());
+        }
+        if (itemDto.getAvailable() != null) {
+            item.setAvailable(itemDto.getAvailable());
         }
         return ItemMapper.toItemDto(itemStorage.updateItem(item));
     }
