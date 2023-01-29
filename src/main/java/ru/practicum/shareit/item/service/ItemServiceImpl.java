@@ -28,23 +28,23 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public ItemDto addItem(Long userId, ItemDto item) {
+    public ItemDto addItem(Long userId, ItemDto itemDto) {
         User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        return ItemMapper.toItemDto(itemStorage.addItem(owner, item, null));
+        return ItemMapper.toItemDto(itemStorage.save(ItemMapper.toItem(itemDto, owner)));
     }
 
     @Override
     public Collection<ItemDto> getItems(Long userId) {
-        return itemStorage.getItems(userId).stream()
+        return itemStorage.findAll().stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
 
     @Override
     public ItemDto patchItem(Long userId, Long itemId, ItemDto itemDto) {
-        Item item = itemStorage.getItem(itemId).orElseThrow(
+        Item item = itemStorage.findById(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
         );
         if (!item.getOwner().getId().equals(userId)) {
@@ -59,20 +59,21 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemStorage.updateItem(item));
+        return ItemMapper.toItemDto(itemStorage.save(item));
     }
 
     @Override
     public ItemDto getItem(Long itemId) {
-        return ItemMapper.toItemDto(itemStorage.getItem(itemId).orElseThrow(
+        return ItemMapper.toItemDto(itemStorage.findById(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
         ));
     }
 
     @Override
     public Collection<ItemDto> searchItems(String text) {
-        return itemStorage.searchItems(text).stream()
+        /*return itemStorage.searchItems(text).stream()
                 .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+                .collect(Collectors.toList());*/
+        return null;
     }
 }
