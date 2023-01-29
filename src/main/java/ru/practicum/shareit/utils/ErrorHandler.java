@@ -1,6 +1,7 @@
 package ru.practicum.shareit.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -22,12 +23,12 @@ public class ErrorHandler {
         );
     }
 
-    @ExceptionHandler({NotUniqueValueException.class})
+    @ExceptionHandler({DataIntegrityViolationException.class})
     @ResponseStatus(HttpStatus.CONFLICT)
     public ErrorResponse handleNotUniqueValueException(final Exception e) {
-        log.warn("Неуникальное значение: {}", e.getMessage(), e);
+        log.warn("Нарушение целостности данных: {}", e.getMessage(), e);
         return new ErrorResponse(
-                "Неуникальное значение: " + e.getMessage()
+                "Нарушение целостности данных: " + e.getMessage()
         );
     }
 
@@ -52,7 +53,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Exception e) {
-        log.warn("Необработанная ошибка: {}", e.getMessage(), e);
+        log.warn(e.getClass().toString() + "\nНеобработанная ошибка: {}", e.getMessage(), e);
         return new ErrorResponse(
                 "Произошла непредвиденная ошибка. " + e.getMessage()
         );

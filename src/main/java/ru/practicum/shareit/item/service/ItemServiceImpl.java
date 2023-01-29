@@ -29,7 +29,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemDto addItem(Long userId, ItemDto item) {
-        User owner = userStorage.getUser(userId).orElseThrow(
+        User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
         return ItemMapper.toItemDto(itemStorage.addItem(owner, item, null));
