@@ -53,7 +53,7 @@ public class ErrorHandler {
     @ExceptionHandler
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handleThrowable(final Exception e) {
-        log.warn(e.getClass().toString() + "\nНеобработанная ошибка: {}", e.getMessage(), e);
+        log.warn("Необработанная ошибка: {}", e.getMessage(), e);
         return new ErrorResponse(
                 "Произошла непредвиденная ошибка. " + e.getMessage()
         );

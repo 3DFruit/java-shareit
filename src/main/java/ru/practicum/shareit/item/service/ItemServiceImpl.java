@@ -12,6 +12,7 @@ import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.utils.exceptions.UnauthorizedAccessException;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -37,7 +38,10 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> getItems(Long userId) {
-        return itemStorage.findAll().stream()
+        User owner = userStorage.findById(userId).orElseThrow(
+                () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
+        );
+        return itemStorage.findAllByOwnerIs(owner).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
     }
@@ -71,9 +75,11 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public Collection<ItemDto> searchItems(String text) {
-        /*return itemStorage.searchItems(text).stream()
+        if (text.isBlank()) {
+            return new ArrayList<>();
+        }
+        return itemStorage.searchItems(text).stream()
                 .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());*/
-        return null;
+                .collect(Collectors.toList());
     }
 }
