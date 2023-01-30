@@ -56,6 +56,7 @@ CREATE TABLE IF NOT EXISTS comments
     item_id      bigint       NOT NULL,
     author_id    bigint       NOT NULL,
     comment_text varchar(200) NOT NULL,
+    created   timestamp    NOT NULL,
     CONSTRAINT comments_pkey PRIMARY KEY (comment_id),
     CONSTRAINT fk_item
         FOREIGN KEY (item_id)

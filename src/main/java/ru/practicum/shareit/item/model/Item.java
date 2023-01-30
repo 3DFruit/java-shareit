@@ -14,7 +14,7 @@ import javax.persistence.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="items")
+@Table(name = "items")
 public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,10 +24,10 @@ public class Item {
     private String name;
     @Column(nullable = false, length = 100)
     private String description;
-    @Column(name="is_available", nullable = false)
+    @Column(name = "is_available", nullable = false)
     private boolean isAvailable;
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name = "user_id")
     private User owner;
 
     @Transient

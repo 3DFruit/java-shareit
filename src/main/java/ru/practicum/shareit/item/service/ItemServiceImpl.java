@@ -3,6 +3,12 @@ package ru.practicum.shareit.item.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.practicum.shareit.booking.storage.BookingStorage;
+import ru.practicum.shareit.item.dto.CommentDto;
+import ru.practicum.shareit.item.dto.CommentPostDto;
+import ru.practicum.shareit.item.model.Comment;
+import ru.practicum.shareit.item.storage.CommentStorage;
+import ru.practicum.shareit.item.utils.CommentMapper;
 import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.item.dto.ItemDto;
@@ -11,7 +17,9 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.utils.exceptions.UnauthorizedAccessException;
+import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -21,11 +29,18 @@ import java.util.stream.Collectors;
 public class ItemServiceImpl implements ItemService {
     ItemStorage itemStorage;
     UserStorage userStorage;
+    CommentStorage commentStorage;
+    BookingStorage bookingStorage;
 
     @Autowired
-    public ItemServiceImpl(ItemStorage itemStorage, UserStorage userStorage) {
+    public ItemServiceImpl(ItemStorage itemStorage,
+                           UserStorage userStorage,
+                           CommentStorage commentStorage,
+                           BookingStorage bookingStorage) {
         this.itemStorage = itemStorage;
         this.userStorage = userStorage;
+        this.commentStorage = commentStorage;
+        this.bookingStorage = bookingStorage;
     }
 
     @Override
@@ -81,5 +96,26 @@ public class ItemServiceImpl implements ItemService {
         return itemStorage.searchItems(text).stream()
                 .map(ItemMapper::toItemDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public CommentDto addComment(Long userId, CommentPostDto dto, Long itemId) {
+        User user = userStorage.findById(userId).orElseThrow(
+                () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
+        );
+        Item item = itemStorage.findById(itemId).orElseThrow(
+                () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
+        );
+        if (bookingStorage.findAllByBookerAndItemAndEndBeforeOrderByStartDesc(user,
+                item,
+                LocalDateTime.now()).size() == 0) {
+            throw new UnsupportedOperationException("Нельзя оставить комментарий," +
+                    " так как данный предмет не был арендован");
+        }
+        Comment comment = CommentMapper.toComment(dto);
+        comment.setItem(item);
+        comment.setAuthor(user);
+        comment.setCreated(LocalDateTime.now());
+        return CommentMapper.toCommentDto(commentStorage.save(comment));
     }
 }
