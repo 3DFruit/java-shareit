@@ -9,6 +9,7 @@ import ru.practicum.shareit.user.model.User;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 
 public interface BookingStorage extends JpaRepository<Booking, Long> {
     Collection<Booking> findAllByBookerOrderByStartDesc(User booker);
@@ -45,7 +46,15 @@ public interface BookingStorage extends JpaRepository<Booking, Long> {
                                                                            Item item,
                                                                            LocalDateTime localDateTime);
 
-    Booking findAllByItemInAndEndBeforeOrderByStartDesc(Collection<Item> items, LocalDateTime localDateTime);
+    @Query("select b from Booking b " +
+            "where b.item = ?1 " +
+            "and b.end < ?2 " +
+            "order by b.end desc")
+    Optional<Booking> findLastBookingBeforeDate(Item item, LocalDateTime localDateTime);
 
-    Booking findNextBooking(Item item);
+    @Query("select b from Booking b " +
+            "where b.item = ?1 " +
+            "and b.start >= ?2 " +
+            "order by b.start asc")
+    Optional<Booking> findNextBookingAfterDate(Item item, LocalDateTime localDateTime);
 }

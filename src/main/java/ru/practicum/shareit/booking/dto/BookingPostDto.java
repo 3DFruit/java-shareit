@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import ru.practicum.shareit.utils.Create;
 
+import javax.validation.constraints.Future;
 import javax.validation.constraints.FutureOrPresent;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -23,7 +24,7 @@ public class BookingPostDto {
     @FutureOrPresent(groups = {Create.class})
     @NotNull(groups = {Create.class})
     private LocalDateTime start;
-    @FutureOrPresent(groups = {Create.class})
+    @Future(groups = {Create.class})
     @NotNull(groups = {Create.class})
     private LocalDateTime end;
 }

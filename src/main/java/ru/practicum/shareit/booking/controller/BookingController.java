@@ -6,7 +6,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingPostDto;
 import ru.practicum.shareit.booking.service.BookingService;
+import ru.practicum.shareit.booking.utils.BookingState;
 import ru.practicum.shareit.utils.Create;
+import ru.practicum.shareit.utils.exceptions.UnknownStateException;
 
 import java.util.Collection;
 
@@ -43,13 +45,17 @@ public class BookingController {
     public Collection<BookingDto> getBookingsOfUser(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                                     @RequestParam(name = "state",
                                                             defaultValue = "ALL") String state) {
-        return bookingService.getBookingsOfUser(userId, state);
+        BookingState bookingState = BookingState.from(state)
+                .orElseThrow(() -> new UnknownStateException(state));
+        return bookingService.getBookingsOfUser(userId, bookingState);
     }
 
     @GetMapping("/owner")
     public Collection<BookingDto> getBookingsOfUserItems(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                                          @RequestParam(name = "state",
                                                                  defaultValue = "ALL") String state) {
-        return bookingService.getBookingsOfUserItems(userId, state);
+        BookingState bookingState = BookingState.from(state)
+                .orElseThrow(() -> new UnknownStateException(state));
+        return bookingService.getBookingsOfUserItems(userId, bookingState);
     }
 }

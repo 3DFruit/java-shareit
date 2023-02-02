@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
 import ru.practicum.shareit.booking.dto.BookingPostDto;
 import ru.practicum.shareit.booking.model.Booking;
@@ -15,7 +16,6 @@ import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.utils.exceptions.UnavailableItemException;
-import ru.practicum.shareit.utils.exceptions.UnknownStateException;
 import ru.practicum.shareit.utils.service.ValidationService;
 import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
@@ -25,6 +25,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class BookingServiceImpl implements BookingService {
 
     BookingStorage bookingStorage;
@@ -44,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto createBooking(Long userId, BookingPostDto bookingDto) {
         validationService.validate(bookingDto);
         Item item = itemStorage.findById(bookingDto.getItemId()).orElseThrow(
@@ -62,6 +64,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
+    @Transactional
     public BookingDto patchBookingStatus(Long userId, Long bookingId, Boolean isApproved) {
         Booking booking = bookingStorage.findById(bookingId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найдена аренда с id " + bookingId)
@@ -95,19 +98,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getBookingsOfUser(Long userId, String state) {
+    public Collection<BookingDto> getBookingsOfUser(Long userId, BookingState state) {
         User user = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state);
-        }
-        catch (IllegalArgumentException e) {
-            throw new UnknownStateException(state);
-        }
         Collection<Booking> bookings;
-        switch (bookingState) {
+        switch (state) {
             case ALL:
                 bookings = bookingStorage.findAllByBookerOrderByStartDesc(user);
                 break;
@@ -137,19 +133,12 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getBookingsOfUserItems(Long userId, String state) {
+    public Collection<BookingDto> getBookingsOfUserItems(Long userId, BookingState state) {
         User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        BookingState bookingState;
-        try {
-            bookingState = BookingState.valueOf(state);
-        }
-        catch (IllegalArgumentException e) {
-            throw new UnknownStateException(state);
-        }
         Collection<Booking> bookings;
-        switch (bookingState) {
+        switch (state) {
             case ALL:
                 bookings = bookingStorage.findAllByItemOwnerIsOrderByStartDesc(owner);
                 break;

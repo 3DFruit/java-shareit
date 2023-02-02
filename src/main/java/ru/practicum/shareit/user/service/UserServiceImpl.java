@@ -1,8 +1,8 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.utils.UserMapper;
@@ -13,7 +13,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     UserStorage userStorage;
@@ -24,6 +24,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
         User user = userStorage.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
@@ -39,6 +40,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
         User user = userStorage.findById(userId)
                 .orElseThrow(() -> {
@@ -54,6 +56,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         userStorage.deleteById(userId);
     }

@@ -1,9 +1,10 @@
 package ru.practicum.shareit.item.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.storage.BookingStorage;
+import ru.practicum.shareit.booking.utils.BookingMapper;
 import ru.practicum.shareit.item.dto.CommentDto;
 import ru.practicum.shareit.item.dto.CommentPostDto;
 import ru.practicum.shareit.item.model.Comment;
@@ -19,13 +20,14 @@ import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 import ru.practicum.shareit.utils.exceptions.UnauthorizedAccessException;
 import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@Transactional(readOnly = true)
 public class ItemServiceImpl implements ItemService {
     ItemStorage itemStorage;
     UserStorage userStorage;
@@ -44,6 +46,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public ItemDto addItem(Long userId, ItemDto itemDto) {
         User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
@@ -56,12 +59,25 @@ public class ItemServiceImpl implements ItemService {
         User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        return itemStorage.findAllByOwnerIs(owner).stream()
-                .map(ItemMapper::toItemDto)
-                .collect(Collectors.toList());
+        Collection<Item> items = itemStorage.findAllByOwnerIsOrderByIdAsc(owner);
+        Collection<ItemDto> itemDtos = new ArrayList<>();
+        for (Item item : items) {
+            itemDtos.add(ItemMapper.toItemDto(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findLastBookingBeforeDate(item,
+                            LocalDateTime.now()).orElse(null)),
+                    BookingMapper.toBookingItemDto(bookingStorage.findNextBookingAfterDate(item,
+                            LocalDateTime.now()).orElse(null)),
+                    commentStorage.findByItemIsOrderByCreatedDesc(item)
+                            .stream()
+                            .map(CommentMapper::toCommentDto)
+                            .collect(Collectors.toList()))
+            );
+        }
+        return itemDtos;
     }
 
     @Override
+    @Transactional
     public ItemDto patchItem(Long userId, Long itemId, ItemDto itemDto) {
         Item item = itemStorage.findById(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
@@ -78,14 +94,32 @@ public class ItemServiceImpl implements ItemService {
         if (itemDto.getAvailable() != null) {
             item.setAvailable(itemDto.getAvailable());
         }
-        return ItemMapper.toItemDto(itemStorage.save(item));
+        return ItemMapper.toItemDto(itemStorage.save(item), commentStorage.findByItemIsOrderByCreatedDesc(item)
+                .stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList()));
     }
 
     @Override
-    public ItemDto getItem(Long itemId) {
-        return ItemMapper.toItemDto(itemStorage.findById(itemId).orElseThrow(
+    public ItemDto getItem(Long userId, Long itemId) {
+        Item item = itemStorage.findById(itemId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден предмет с id " + itemId)
-        ));
+        );
+        if (item.getOwner().getId().equals(userId)) {
+            return ItemMapper.toItemDto(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findLastBookingBeforeDate(item,
+                            LocalDateTime.now()).orElse(null)),
+                    BookingMapper.toBookingItemDto(bookingStorage.findNextBookingAfterDate(item,
+                            LocalDateTime.now()).orElse(null)),
+                    commentStorage.findByItemIsOrderByCreatedDesc(item)
+                            .stream()
+                            .map(CommentMapper::toCommentDto)
+                            .collect(Collectors.toList()));
+        }
+        return ItemMapper.toItemDto(item, commentStorage.findByItemIsOrderByCreatedDesc(item)
+                .stream()
+                .map(CommentMapper::toCommentDto)
+                .collect(Collectors.toList()));
     }
 
     @Override
@@ -99,6 +133,7 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
+    @Transactional
     public CommentDto addComment(Long userId, CommentPostDto dto, Long itemId) {
         User user = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)

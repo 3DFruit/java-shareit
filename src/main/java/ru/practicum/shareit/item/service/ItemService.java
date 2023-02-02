@@ -13,8 +13,9 @@ public interface ItemService {
 
     ItemDto patchItem(Long userId, Long itemId, ItemDto itemDto);
 
-    ItemDto getItem(Long itemId);
+    ItemDto getItem(Long userId, Long itemId);
 
     Collection<ItemDto> searchItems(String text);
+
     CommentDto addComment(Long userId, CommentPostDto dto, Long itemId);
 }
