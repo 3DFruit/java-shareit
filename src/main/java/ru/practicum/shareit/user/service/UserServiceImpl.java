@@ -1,42 +1,38 @@
 package ru.practicum.shareit.user.service;
 
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.dto.UserDto;
 import ru.practicum.shareit.user.utils.UserMapper;
 import ru.practicum.shareit.user.storage.UserStorage;
-import ru.practicum.shareit.utils.exceptions.NotUniqueValueException;
-import ru.practicum.shareit.utils.service.ValidationService;
 import ru.practicum.shareit.utils.exceptions.ObjectNotFoundException;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
 @Service
-@Slf4j
+@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService {
 
     UserStorage userStorage;
-    ValidationService validationService;
 
     @Autowired
-    public UserServiceImpl(UserStorage userStorage, ValidationService validationService) {
+    public UserServiceImpl(UserStorage userStorage) {
         this.userStorage = userStorage;
-        this.validationService = validationService;
     }
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto userDto) {
-        validationService.validate(userDto);
-        User user = userStorage.createUser(userDto);
+        User user = userStorage.save(UserMapper.toUser(userDto));
         return UserMapper.toUserDto(user);
     }
 
     @Override
     public UserDto getUser(Long userId) {
-        User user = userStorage.getUser(userId)
+        User user = userStorage.findById(userId)
                 .orElseThrow(() -> {
                     throw new ObjectNotFoundException("Не найден пользователь с id " + userId);
                 });
@@ -44,8 +40,9 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    @Transactional
     public UserDto updateUser(Long userId, UserDto userDto) {
-        User user = userStorage.getUser(userId)
+        User user = userStorage.findById(userId)
                 .orElseThrow(() -> {
                     throw new ObjectNotFoundException("Не найден пользователь с id " + userId);
                 });
@@ -53,22 +50,21 @@ public class UserServiceImpl implements UserService {
             user.setName(userDto.getName());
         }
         if (userDto.getEmail() != null) {
-            if (userStorage.isUniqueEmail(userDto.getEmail(), userId)) {
-                user.setEmail(userDto.getEmail());
-            } else {
-                throw new NotUniqueValueException("адрес электронной почты");
-            }
+            user.setEmail(userDto.getEmail());
         }
-        return UserMapper.toUserDto(userStorage.updateUser(user));
+        return UserMapper.toUserDto(userStorage.save(user));
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
-        userStorage.deleteUser(userId);
+        userStorage.deleteById(userId);
     }
 
     @Override
     public Collection<UserDto> getUsers() {
-        return userStorage.getUsers().stream().map(UserMapper::toUserDto).collect(Collectors.toList());
+        return userStorage.findAll().stream()
+                .map(UserMapper::toUserDto)
+                .collect(Collectors.toList());
     }
 }
