@@ -1,6 +1,9 @@
 package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.shareit.booking.dto.BookingDto;
@@ -20,7 +23,6 @@ import ru.practicum.shareit.utils.service.ValidationService;
 import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
@@ -98,34 +100,41 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getBookingsOfUser(Long userId, BookingState state) {
+    public Collection<BookingDto> getBookingsOfUser(Long userId, BookingState state, Integer from, Integer size) {
         User user = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        Collection<Booking> bookings;
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<Booking> bookings;
         switch (state) {
             case ALL:
-                bookings = bookingStorage.findAllByBookerOrderByStartDesc(user);
+                bookings = bookingStorage.findAllByBookerOrderByStartDesc(user, pageable);
                 break;
             case CURRENT:
-                bookings = bookingStorage.findBookingByBookerAndDate(user, LocalDateTime.now());
+                bookings = bookingStorage.findBookingByBookerAndDate(user, LocalDateTime.now(), pageable);
                 break;
             case PAST:
-                bookings = bookingStorage.findAllByBookerAndEndBeforeOrderByStartDesc(user, LocalDateTime.now());
+                bookings = bookingStorage.findAllByBookerAndEndBeforeOrderByStartDesc(user,
+                        LocalDateTime.now(),
+                        pageable);
                 break;
             case FUTURE:
-                bookings = bookingStorage.findAllByBookerAndStartAfterOrderByStartDesc(user, LocalDateTime.now());
+                bookings = bookingStorage.findAllByBookerAndStartAfterOrderByStartDesc(user,
+                        LocalDateTime.now(),
+                        pageable);
                 break;
             case WAITING:
                 bookings = bookingStorage.findAllByBookerAndStatusOrderByStartDesc(user,
-                        BookingStatus.WAITING);
+                        BookingStatus.WAITING,
+                        pageable);
                 break;
             case REJECTED:
                 bookings = bookingStorage.findAllByBookerAndStatusOrderByStartDesc(user,
-                        BookingStatus.REJECTED);
+                        BookingStatus.REJECTED,
+                        pageable);
                 break;
             default:
-                bookings = new ArrayList<>();
+                bookings = null;
         }
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
@@ -133,34 +142,41 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public Collection<BookingDto> getBookingsOfUserItems(Long userId, BookingState state) {
+    public Collection<BookingDto> getBookingsOfUserItems(Long userId, BookingState state, Integer from, Integer size) {
         User owner = userStorage.findById(userId).orElseThrow(
                 () -> new ObjectNotFoundException("Не найден пользователь с id " + userId)
         );
-        Collection<Booking> bookings;
+        Pageable pageable = PageRequest.of(from / size, size);
+        Page<Booking> bookings;
         switch (state) {
             case ALL:
-                bookings = bookingStorage.findAllByItemOwnerIsOrderByStartDesc(owner);
+                bookings = bookingStorage.findAllByItemOwnerIsOrderByStartDesc(owner, pageable);
                 break;
             case CURRENT:
-                bookings = bookingStorage.findBookingByOwnerAndDate(owner, LocalDateTime.now());
+                bookings = bookingStorage.findBookingByOwnerAndDate(owner, LocalDateTime.now(), pageable);
                 break;
             case PAST:
-                bookings = bookingStorage.findAllByItemOwnerIsAndEndBeforeOrderByStartDesc(owner, LocalDateTime.now());
+                bookings = bookingStorage.findAllByItemOwnerIsAndEndBeforeOrderByStartDesc(owner,
+                        LocalDateTime.now(),
+                        pageable);
                 break;
             case FUTURE:
-                bookings = bookingStorage.findAllByItemOwnerIsAndStartAfterOrderByStartDesc(owner, LocalDateTime.now());
+                bookings = bookingStorage.findAllByItemOwnerIsAndStartAfterOrderByStartDesc(owner,
+                        LocalDateTime.now(),
+                        pageable);
                 break;
             case WAITING:
                 bookings = bookingStorage.findAllByItemOwnerIsAndStatusOrderByStartDesc(owner,
-                        BookingStatus.WAITING);
+                        BookingStatus.WAITING,
+                        pageable);
                 break;
             case REJECTED:
                 bookings = bookingStorage.findAllByItemOwnerIsAndStatusOrderByStartDesc(owner,
-                        BookingStatus.REJECTED);
+                        BookingStatus.REJECTED,
+                        pageable);
                 break;
             default:
-                bookings = new ArrayList<>();
+                bookings = null;
         }
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)

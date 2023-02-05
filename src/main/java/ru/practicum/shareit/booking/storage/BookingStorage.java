@@ -1,5 +1,7 @@
 package ru.practicum.shareit.booking.storage;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import ru.practicum.shareit.booking.model.Booking;
@@ -12,35 +14,47 @@ import java.util.Collection;
 import java.util.Optional;
 
 public interface BookingStorage extends JpaRepository<Booking, Long> {
-    Collection<Booking> findAllByBookerOrderByStartDesc(User booker);
+    Page<Booking> findAllByBookerOrderByStartDesc(User booker, Pageable pageable);
 
-    Collection<Booking> findAllByBookerAndStatusOrderByStartDesc(User booker, BookingStatus status);
+    Page<Booking> findAllByBookerAndStatusOrderByStartDesc(User booker, BookingStatus status, Pageable pageable);
 
-    Collection<Booking> findAllByBookerAndEndBeforeOrderByStartDesc(User booker, LocalDateTime localDateTime);
+    Page<Booking> findAllByBookerAndEndBeforeOrderByStartDesc(User booker,
+                                                                    LocalDateTime localDateTime,
+                                                                    Pageable pageable);
 
-    Collection<Booking> findAllByBookerAndStartAfterOrderByStartDesc(User booker, LocalDateTime localDateTime);
+    Page<Booking> findAllByBookerAndStartAfterOrderByStartDesc(User booker,
+                                                                     LocalDateTime localDateTime,
+                                                                     Pageable pageable);
 
     @Query("select b from Booking b " +
             "where b.booker = ?1 " +
             "and b.start < ?2 " +
             "and b.end > ?2 " +
             "order by b.start desc")
-    Collection<Booking> findBookingByBookerAndDate(User booker, LocalDateTime localDateTime);
+    Page<Booking> findBookingByBookerAndDate(User booker,
+                                             LocalDateTime localDateTime,
+                                             Pageable pageable);
 
-    Collection<Booking> findAllByItemOwnerIsOrderByStartDesc(User owner);
+    Page<Booking> findAllByItemOwnerIsOrderByStartDesc(User owner, Pageable pageable);
 
-    Collection<Booking> findAllByItemOwnerIsAndStatusOrderByStartDesc(User owner, BookingStatus status);
+    Page<Booking> findAllByItemOwnerIsAndStatusOrderByStartDesc(User owner,
+                                                                      BookingStatus status,
+                                                                      Pageable pageable);
 
-    Collection<Booking> findAllByItemOwnerIsAndEndBeforeOrderByStartDesc(User owner, LocalDateTime localDateTime);
+    Page<Booking> findAllByItemOwnerIsAndEndBeforeOrderByStartDesc(User owner,
+                                                                         LocalDateTime localDateTime,
+                                                                         Pageable pageable);
 
-    Collection<Booking> findAllByItemOwnerIsAndStartAfterOrderByStartDesc(User owner, LocalDateTime localDateTime);
+    Page<Booking> findAllByItemOwnerIsAndStartAfterOrderByStartDesc(User owner,
+                                                                          LocalDateTime localDateTime,
+                                                                          Pageable pageable);
 
     @Query("select b from Booking b " +
             "where b.item.owner = ?1 " +
             "and b.start < ?2 " +
             "and b.end > ?2 " +
             "order by b.start desc")
-    Collection<Booking> findBookingByOwnerAndDate(User booker, LocalDateTime localDateTime);
+    Page<Booking> findBookingByOwnerAndDate(User booker, LocalDateTime localDateTime, Pageable pageable);
 
     Collection<Booking> findAllByBookerAndItemAndEndBeforeOrderByStartDesc(User booker,
                                                                            Item item,

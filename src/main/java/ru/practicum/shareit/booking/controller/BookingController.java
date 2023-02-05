@@ -9,6 +9,7 @@ import ru.practicum.shareit.booking.service.BookingService;
 import ru.practicum.shareit.booking.utils.BookingState;
 import ru.practicum.shareit.utils.Create;
 import ru.practicum.shareit.utils.exceptions.UnknownStateException;
+import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
 import java.util.Collection;
 
@@ -43,19 +44,29 @@ public class BookingController {
 
     @GetMapping
     public Collection<BookingDto> getBookingsOfUser(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
-                                                    @RequestParam(name = "state",
-                                                            defaultValue = "ALL") String state) {
+                                                    @RequestParam(name = "state", defaultValue = "ALL") String state,
+                                                    @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                    @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new UnsupportedOperationException("Неверные параметры запроса");
+        }
         BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new UnknownStateException(state));
-        return bookingService.getBookingsOfUser(userId, bookingState);
+        return bookingService.getBookingsOfUser(userId, bookingState, from, size);
     }
 
     @GetMapping("/owner")
     public Collection<BookingDto> getBookingsOfUserItems(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
                                                          @RequestParam(name = "state",
-                                                                 defaultValue = "ALL") String state) {
+                                                                 defaultValue = "ALL") String state,
+                                                         @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                         @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new UnsupportedOperationException("Неверные параметры запроса");
+        }
         BookingState bookingState = BookingState.from(state)
                 .orElseThrow(() -> new UnknownStateException(state));
-        return bookingService.getBookingsOfUserItems(userId, bookingState);
+
+        return bookingService.getBookingsOfUserItems(userId, bookingState, from, size);
     }
 }

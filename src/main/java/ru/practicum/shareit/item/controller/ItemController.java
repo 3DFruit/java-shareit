@@ -9,6 +9,7 @@ import ru.practicum.shareit.item.service.ItemService;
 import ru.practicum.shareit.item.dto.ItemDto;
 import ru.practicum.shareit.utils.Create;
 import ru.practicum.shareit.utils.Update;
+import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
 import java.util.Collection;
 
@@ -36,8 +37,13 @@ public class ItemController {
     }
 
     @GetMapping
-    public Collection<ItemDto> getItems(@RequestHeader(name = "X-Sharer-User-Id") Long userId) {
-        return itemService.getItems(userId);
+    public Collection<ItemDto> getItems(@RequestHeader(name = "X-Sharer-User-Id") Long userId,
+                                        @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                        @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new UnsupportedOperationException("Неверные параметры запроса");
+        }
+        return itemService.getItems(userId, from, size);
     }
 
     @PatchMapping("/{itemId}")
@@ -54,7 +60,12 @@ public class ItemController {
     }
 
     @GetMapping("/search")
-    public Collection<ItemDto> searchItems(@RequestParam String text) {
-        return itemService.searchItems(text);
+    public Collection<ItemDto> searchItems(@RequestParam String text,
+                                           @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                           @RequestParam(name = "size", defaultValue = "20") Integer size) {
+        if (from < 0 || size < 1) {
+            throw new UnsupportedOperationException("Неверные параметры запроса");
+        }
+        return itemService.searchItems(text, from, size);
     }
 }
