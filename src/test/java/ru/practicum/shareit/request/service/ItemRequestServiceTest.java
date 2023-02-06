@@ -1,4 +1,4 @@
-package ru.practicum.shareit;
+package ru.practicum.shareit.request.service;
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -7,8 +7,6 @@ import org.springframework.data.domain.Pageable;
 import ru.practicum.shareit.item.storage.ItemStorage;
 import ru.practicum.shareit.request.dto.ItemRequestPostDto;
 import ru.practicum.shareit.request.model.ItemRequest;
-import ru.practicum.shareit.request.service.ItemRequestService;
-import ru.practicum.shareit.request.service.ItemRequestServiceImpl;
 import ru.practicum.shareit.request.storage.ItemRequestStorage;
 import ru.practicum.shareit.user.model.User;
 import ru.practicum.shareit.user.storage.UserStorage;
@@ -22,7 +20,7 @@ import static org.mockito.ArgumentMatchers.*;
 
 public class ItemRequestServiceTest {
     @Test
-    void testCreateRequest() {
+    void createRequestTest() {
         UserStorage userStorage = Mockito.mock(UserStorage.class);
         ItemRequestStorage itemRequestStorage = Mockito.mock(ItemRequestStorage.class);
         ItemStorage itemStorage = Mockito.mock(ItemStorage.class);
