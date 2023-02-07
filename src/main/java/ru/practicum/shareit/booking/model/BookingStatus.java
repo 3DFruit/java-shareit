@@ -4,5 +4,10 @@ public enum BookingStatus {
     WAITING,
     APPROVED,
     REJECTED,
-    CANCELED
+    CANCELED;
+
+    @Override
+    public String toString() {
+        return this.name();
+    }
 }
