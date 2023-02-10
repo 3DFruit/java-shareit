@@ -137,10 +137,10 @@ public class ItemServiceTest {
                 .when(itemStorage.findAllByOwnerIsOrderByIdAsc(any(User.class), any(Pageable.class)))
                 .thenReturn(new PageImpl<>(List.of(testItem)));
         Mockito
-                .when(bookingStorage.findLastBookingBeforeDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndEndBeforeOrderByEndDesc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.empty());
         Mockito
-                .when(bookingStorage.findNextBookingAfterDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndStartAfterOrderByStartAsc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.empty());
         Mockito
                 .when(commentStorage.findByItemIsOrderByCreatedDesc(any(Item.class)))
@@ -156,10 +156,10 @@ public class ItemServiceTest {
                 .findAllByOwnerIsOrderByIdAsc(any(User.class), any(Pageable.class));
         Mockito
                 .verify(bookingStorage, Mockito.times(1))
-                .findLastBookingBeforeDate(any(Item.class), any(LocalDateTime.class));
+                .findFirstByItemIsAndEndBeforeOrderByEndDesc(any(Item.class), any(LocalDateTime.class));
         Mockito
                 .verify(bookingStorage, Mockito.times(1))
-                .findNextBookingAfterDate(any(Item.class), any(LocalDateTime.class));
+                .findFirstByItemIsAndStartAfterOrderByStartAsc(any(Item.class), any(LocalDateTime.class));
         Mockito
                 .verify(commentStorage, Mockito.times(1))
                 .findByItemIsOrderByCreatedDesc(any(Item.class));
@@ -282,7 +282,7 @@ public class ItemServiceTest {
                 .when(itemStorage.findById(1L))
                 .thenReturn(Optional.of(testItem));
         Mockito
-                .when(bookingStorage.findLastBookingBeforeDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndEndBeforeOrderByEndDesc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.of(new Booking(
                         testItem,
                         LocalDateTime.of(2000, 1, 21, 12, 30),
@@ -290,7 +290,7 @@ public class ItemServiceTest {
                         testUser,
                         BookingStatus.APPROVED)));
         Mockito
-                .when(bookingStorage.findNextBookingAfterDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndStartAfterOrderByStartAsc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.of(new Booking(
                         testItem,
                         LocalDateTime.of(2023, 3, 21, 12, 30),
@@ -334,7 +334,7 @@ public class ItemServiceTest {
                 .when(itemStorage.findById(1L))
                 .thenReturn(Optional.of(testItem));
         Mockito
-                .when(bookingStorage.findLastBookingBeforeDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndEndBeforeOrderByEndDesc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.of(new Booking(
                         testItem,
                         LocalDateTime.of(2000, 1, 21, 12, 30),
@@ -342,7 +342,7 @@ public class ItemServiceTest {
                         testUser,
                         BookingStatus.APPROVED)));
         Mockito
-                .when(bookingStorage.findNextBookingAfterDate(any(Item.class), any(LocalDateTime.class)))
+                .when(bookingStorage.findFirstByItemIsAndStartAfterOrderByStartAsc(any(Item.class), any(LocalDateTime.class)))
                 .thenReturn(Optional.of(new Booking(
                         testItem,
                         LocalDateTime.of(2023, 3, 21, 12, 30),
@@ -363,10 +363,10 @@ public class ItemServiceTest {
                 .findById(anyLong());
         Mockito
                 .verify(bookingStorage, Mockito.times(1))
-                .findLastBookingBeforeDate(any(Item.class), any(LocalDateTime.class));
+                .findFirstByItemIsAndEndBeforeOrderByEndDesc(any(Item.class), any(LocalDateTime.class));
         Mockito
                 .verify(bookingStorage, Mockito.times(1))
-                .findNextBookingAfterDate(any(Item.class), any(LocalDateTime.class));
+                .findFirstByItemIsAndStartAfterOrderByStartAsc(any(Item.class), any(LocalDateTime.class));
         Mockito
                 .verify(commentStorage, Mockito.times(1))
                 .findByItemIsOrderByCreatedDesc(any(Item.class));

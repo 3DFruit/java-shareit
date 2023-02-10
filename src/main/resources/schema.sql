@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS bookings
     start_time timestamp   NOT NULL,
     end_time   timestamp   NOT NULL,
     CONSTRAINT bookings_pkey PRIMARY KEY (booking_id),
-    CONSTRAINT check_dates check (start_time > now() AND start_time < end_time),
+    CONSTRAINT check_dates check (start_time < end_time),
     CONSTRAINT fk_booking_item
         FOREIGN KEY (item_id)
             REFERENCES items (item_id),

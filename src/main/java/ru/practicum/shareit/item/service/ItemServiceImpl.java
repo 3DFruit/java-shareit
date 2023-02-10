@@ -78,9 +78,9 @@ public class ItemServiceImpl implements ItemService {
         Collection<ItemDto> itemDtos = new ArrayList<>();
         for (Item item : items) {
             itemDtos.add(ItemMapper.toItemDto(item,
-                    BookingMapper.toBookingItemDto(bookingStorage.findLastBookingBeforeDate(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findFirstByItemIsAndEndBeforeOrderByEndDesc(item,
                             LocalDateTime.now()).orElse(null)),
-                    BookingMapper.toBookingItemDto(bookingStorage.findNextBookingAfterDate(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findFirstByItemIsAndStartAfterOrderByStartAsc(item,
                             LocalDateTime.now()).orElse(null)),
                     commentStorage.findByItemIsOrderByCreatedDesc(item)
                             .stream()
@@ -122,9 +122,9 @@ public class ItemServiceImpl implements ItemService {
         );
         if (item.getOwner().getId().equals(userId)) {
             return ItemMapper.toItemDto(item,
-                    BookingMapper.toBookingItemDto(bookingStorage.findLastBookingBeforeDate(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findFirstByItemIsAndEndBeforeOrderByEndDesc(item,
                             LocalDateTime.now()).orElse(null)),
-                    BookingMapper.toBookingItemDto(bookingStorage.findNextBookingAfterDate(item,
+                    BookingMapper.toBookingItemDto(bookingStorage.findFirstByItemIsAndStartAfterOrderByStartAsc(item,
                             LocalDateTime.now()).orElse(null)),
                     commentStorage.findByItemIsOrderByCreatedDesc(item)
                             .stream()
