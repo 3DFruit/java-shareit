@@ -210,7 +210,7 @@ public class BookingStorageTest {
                         .filter((Booking b) -> b.getItem().getId().equals(testItem.getId()))
                                 .filter((Booking b) -> b.getEnd().isBefore(dateTime))
                 .max(Comparator.comparing(Booking::getEnd))
-                .get();
+                .orElse(new Booking());
         Assertions.assertEquals(booking.getId(), lastBooking.getId());
     }
 
@@ -225,7 +225,7 @@ public class BookingStorageTest {
                 .filter((Booking b) -> b.getItem().getId().equals(testItem.getId()))
                 .filter((Booking b) -> b.getStart().isAfter(dateTime) || b.getStart().isEqual(dateTime))
                 .min(Comparator.comparing(Booking::getStart))
-                .get();
+                .orElse(new Booking());
         Assertions.assertEquals(booking.getId(), nextBooking.getId());
     }
 }
