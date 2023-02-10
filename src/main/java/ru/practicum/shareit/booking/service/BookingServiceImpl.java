@@ -2,6 +2,7 @@ package ru.practicum.shareit.booking.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import ru.practicum.shareit.utils.exceptions.UnsupportedOperationException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -134,7 +136,7 @@ public class BookingServiceImpl implements BookingService {
                         pageable);
                 break;
             default:
-                bookings = null;
+                bookings = new PageImpl<>(List.of());
         }
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
@@ -176,7 +178,7 @@ public class BookingServiceImpl implements BookingService {
                         pageable);
                 break;
             default:
-                bookings = null;
+                bookings = new PageImpl<>(List.of());
         }
         return bookings.stream()
                 .map(BookingMapper::toBookingDto)
