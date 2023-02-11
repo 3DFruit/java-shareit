@@ -6,7 +6,9 @@ import ru.practicum.shareit.booking.dto.BookingPostDto;
 import ru.practicum.shareit.booking.model.Booking;
 import ru.practicum.shareit.booking.model.BookingStatus;
 import ru.practicum.shareit.item.model.Item;
+import ru.practicum.shareit.item.utils.ItemMapper;
 import ru.practicum.shareit.user.model.User;
+import ru.practicum.shareit.user.utils.UserMapper;
 
 public class BookingMapper {
     public static Booking toBooking(BookingPostDto bookingDto, Item item, User booker) {
@@ -30,10 +32,10 @@ public class BookingMapper {
 
     public static BookingDto toBookingDto(Booking booking) {
         return new BookingDto(booking.getId(),
-                booking.getItem(),
+                ItemMapper.toItemDto(booking.getItem()),
                 booking.getStart(),
                 booking.getEnd(),
-                booking.getBooker(),
+                UserMapper.toUserDto(booking.getBooker()),
                 booking.getStatus());
     }
 }
